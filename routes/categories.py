@@ -7,7 +7,7 @@ from database import get_db
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
 
-@router.post("/categories/")
+@router.post("/")
 def create_category(category: CategoryCreate, db: SessionLocal = Depends(get_db), current_user = Depends(get_current_user)):
     if db.query(Category).filter(Category.name == category.name, Category.user_id == current_user.id).first():
         raise HTTPException(status_code=400, detail="Category already exists")
@@ -17,7 +17,7 @@ def create_category(category: CategoryCreate, db: SessionLocal = Depends(get_db)
     db.refresh(new_category)
     return new_category
 
-@router.get("/categories/")
+@router.get("/")
 def read_categories(db: SessionLocal = Depends(get_db), current_user: SessionLocal = Depends(get_current_user)):
     categories = db.query(Category).filter(Category.user_id == current_user.id).all()
     return categories

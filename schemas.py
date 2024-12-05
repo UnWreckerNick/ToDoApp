@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 
 class RegisterUser(BaseModel):
     username: str
@@ -9,6 +10,7 @@ class TodoCreate(BaseModel):
     title: str
     description: Optional[str] = None
     category_id: Optional[int] = None
+    deadline: Optional[datetime] = None
 
 class ToDoUpdate(BaseModel):
     title: str = None

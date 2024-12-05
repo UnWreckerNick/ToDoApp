@@ -4,6 +4,7 @@ from database import SessionLocal
 from models import ToDoItem, Category
 from auth import get_current_user
 from database import get_db
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
 
@@ -20,7 +21,8 @@ def create_todo(
         title=todo.title,
         description=todo.description,
         user_id=current_user.id,
-        category_id=todo.category_id
+        category_id=todo.category_id,
+        deadline=todo.deadline
     )
     db.add(db_todo)
     db.commit()
@@ -37,7 +39,18 @@ def read_user_todos(current_user = Depends(get_current_user), db: SessionLocal =
     users = db.query(ToDoItem).filter(ToDoItem.user_id == current_user.id).all()
     return users
 
-@router.put("/todos/{todo_id}")
+@router.get("/upcoming/")
+def get_upcoming_deadlines(days: int = 7, db: SessionLocal = Depends(get_db), current_user = Depends(get_current_user)):
+    now = datetime.now(timezone.utc)
+    upcoming = now + timedelta(days=days)
+    todos = db.query(ToDoItem).filter(
+        ToDoItem.user_id == current_user.id,
+        ToDoItem.deadline is not None,
+        ToDoItem.deadline.between(now, upcoming)
+    ).all()
+    return todos
+
+@router.put("/{todo_id}")
 def update_todo(todo_id: int, todo: ToDoUpdate, db: SessionLocal = Depends(get_db)):
     db_todo = db.query(ToDoItem).filter(ToDoItem.id == todo_id).first()
     if not db_todo:
@@ -49,7 +62,7 @@ def update_todo(todo_id: int, todo: ToDoUpdate, db: SessionLocal = Depends(get_d
     db.refresh(db_todo)
     return db_todo
 
-@router.delete("/todos/{todo_id}")
+@router.delete("/{todo_id}")
 def delete_todo(todo_id: int, db: SessionLocal = Depends(get_db)):
     db_todo = db.query(ToDoItem).filter(ToDoItem.id == todo_id).first()
     if not db_todo:

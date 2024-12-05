@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from database import Base
 
 class Category(Base):
@@ -21,3 +21,4 @@ class ToDoItem(Base):
     completed = Column(String, default=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    deadline = Column(DateTime, nullable=True)
