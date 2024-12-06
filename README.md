@@ -28,8 +28,8 @@ This is a task management web application built using **FastAPI** for the backen
 `python -m venv .venv`
 
 ### 3. Activate the virtual environment:
-On Windows: `.venv\Scripts\activate`
-On macOS/Linux: `source .venv/bin/activate`
+- **On Windows**: `.venv\Scripts\activate`
+- **On macOS/Linux**: `source .venv/bin/activate`
 
 ### 4. Install the dependencies:
 `pip install -r requirements.txt`
