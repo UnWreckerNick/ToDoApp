@@ -15,7 +15,7 @@ This is a task management web application built using **FastAPI** for the backen
 
 - **Backend**: FastAPI
 - **Frontend**: HTML, CSS, JavaScript
-- **Database**: PostgreSQL
+- **Database**: SQLite (default file-based database for local development)
 - **ORM**: SQLAlchemy
 - **Authentication**: JWT (JSON Web Tokens)
 
