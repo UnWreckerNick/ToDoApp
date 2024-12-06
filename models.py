@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, LargeBinary
 from database import Base
 
 class Category(Base):
@@ -22,3 +22,4 @@ class ToDoItem(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     deadline = Column(DateTime, nullable=True)
+    file_data = Column(LargeBinary, nullable=True)

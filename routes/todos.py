@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from starlette.responses import StreamingResponse
 from schemas import TodoCreate, ToDoUpdate
-from database import SessionLocal
+from database import SessionLocal, get_db
 from models import ToDoItem, Category
 from auth import get_current_user
-from database import get_db
 from datetime import datetime, timedelta, timezone
+from config import MAX_FILE_SIZE
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
 
@@ -70,3 +71,37 @@ def delete_todo(todo_id: int, db: SessionLocal = Depends(get_db)):
     db.delete(db_todo)
     db.commit()
     return {"message": "ToDo deleted"}
+
+@router.post("/{todo_id}/upload/")
+def upload_file(
+        todo_id: int,
+        file: UploadFile = File(...),
+        db: SessionLocal = Depends(get_db),
+        current_user = Depends(get_current_user)
+):
+    todo = db.query(ToDoItem).filter(ToDoItem.id == todo_id, ToDoItem.user_id == current_user.id).first()
+    if not todo:
+        raise HTTPException(status_code=404, detail="ToDo not found")
+    file_content = file.file.read()
+    if len(file_content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="File is too large")
+    todo.file_data = file_content
+    db.commit()
+    return {"message": "File uploaded successfully", "filename": file.filename}
+
+@router.get("/{todo_id}/download/")
+def download_file(
+        todo_id: int,
+        db: SessionLocal = Depends(get_db),
+        current_user = Depends(get_current_user)
+):
+    todo = db.query(ToDoItem).filter(ToDoItem.id == todo_id, ToDoItem.user_id == current_user.id).first()
+    if not todo:
+        raise HTTPException(status_code=404, detail="ToDo not found")
+    if not todo.file_data:
+        raise HTTPException(status_code=404, detail="File not found")
+    return StreamingResponse(
+        iter([todo.file_data]),
+        headers={"Content-Deposition": f"attachment; filename=todo_{todo_id}_file"},
+        media_type="application/octet-stream"
+    )
