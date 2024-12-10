@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from starlette.responses import StreamingResponse
-from schemas import TodoCreate, ToDoUpdate
-from database import SessionLocal, get_db
-from models import ToDoItem, Category
-from auth import get_current_user
+from app.schemas import TodoCreate, ToDoUpdate
+from app.database import SessionLocal, get_db
+from app.models import ToDoItem, Category
+from app.auth import get_current_user
 from datetime import datetime, timedelta, timezone
-from config import MAX_FILE_SIZE
+from app.config import MAX_FILE_SIZE
+from app.cache import get_cached_todos, cache_todo
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
 
@@ -37,8 +38,12 @@ def read_all_todos(skip: int = 0, limit: int = 10, db: SessionLocal = Depends(ge
 
 @router.get("/")
 def read_user_todos(current_user = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
-    users = db.query(ToDoItem).filter(ToDoItem.user_id == current_user.id).all()
-    return users
+    cached_todos = get_cached_todos(current_user.id)
+    if cached_todos:
+        return cached_todos
+    todos = db.query(ToDoItem).filter(ToDoItem.user_id == current_user.id).all()
+    cached_todos(current_user.id, todos)
+    return todos
 
 @router.get("/upcoming/")
 def get_upcoming_deadlines(days: int = 7, db: SessionLocal = Depends(get_db), current_user = Depends(get_current_user)):

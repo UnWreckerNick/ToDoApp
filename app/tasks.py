@@ -1,5 +1,5 @@
-from database import SessionLocal
-from models import ToDoItem
+from app.database import SessionLocal
+from app.models import ToDoItem
 from datetime import datetime, timezone
 from apscheduler.schedulers.background import BackgroundScheduler
 

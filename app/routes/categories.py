@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from schemas import CategoryCreate
-from database import SessionLocal
-from models import ToDoItem, Category
-from auth import get_current_user
-from database import get_db
+from app.schemas import CategoryCreate
+from app.database import SessionLocal
+from app.models import ToDoItem, Category
+from app.auth import get_current_user
+from app.database import get_db
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
 

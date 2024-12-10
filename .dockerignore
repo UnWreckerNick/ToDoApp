@@ -1,4 +1,4 @@
 .venv
-todo.db
+app.todo.db
 .env
 Dockerfile
