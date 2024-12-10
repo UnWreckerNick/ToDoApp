@@ -45,13 +45,3 @@ def test_create_todo(user_token):
 
     assert response.status_code == 200
     assert response.json()["title"] == "Test todo"
-
-@pytest.fixture(autouse=True)
-def clean_db():
-    yield
-    db = SessionLocal()
-    try:
-        db.query(User).delete()
-        db.commit()
-    finally:
-        db.close()
