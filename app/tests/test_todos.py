@@ -19,11 +19,20 @@ def user_token():
     return response_data["access_token"]
 
 def test_register():
-    response_data = client.post("/users/register/", json={
-        "username": "testuser",
-        "password": "testpassword"
-    })
-    assert response_data.status_code == 200
+    db = SessionLocal()
+    try:
+        existing_user = db.query(User).filter(User.username == "testuser").first()
+        if existing_user:
+            db.delete(existing_user)
+            db.commit()
+
+        response_data = client.post("/users/register/", json={
+            "username": "testuser",
+            "password": "testpassword"
+        })
+        assert response_data.status_code == 200
+    finally:
+        db.close()
 
 def test_login():
     response = client.post("/users/login/", json={
