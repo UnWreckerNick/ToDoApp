@@ -29,14 +29,14 @@ jobs:
       - name: Run tests
         run: pytest
 
-deploy:
-  runs-on: ubuntu-latest
-  needs: test
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Deply application
-      run: |
-        ssh user@your-server 'cd /path/to/your/app && git pull && docker-compose up -d --build'
+      - name: Deply application
+        run: |
+          ssh user@your-server 'cd /path/to/your/app && git pull && docker-compose up -d --build'
