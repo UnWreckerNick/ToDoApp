@@ -1,10 +1,12 @@
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from app.database import SessionLocal
+from app.models import User
 
 client = TestClient(app)
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def user_token():
     response = client.post("/users/login/", json={
         "username": "testuser",
@@ -15,6 +17,17 @@ def user_token():
     assert "access_token" in response_data
     assert response_data["token_type"] == "bearer"
     return response_data["access_token"]
+
+
+@pytest.fixture(autouse=True)
+def clean_db():
+    db = SessionLocal()
+    try:
+        db.query(User).delete()
+        db.commit()
+        yield
+    finally:
+        db.close()
 
 def test_register():
     response_data = client.post("/users/register/", json={
