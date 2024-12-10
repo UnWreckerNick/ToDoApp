@@ -18,17 +18,6 @@ def user_token():
     assert response_data["token_type"] == "bearer"
     return response_data["access_token"]
 
-
-@pytest.fixture(autouse=True)
-def clean_db():
-    db = SessionLocal()
-    try:
-        db.query(User).delete()
-        db.commit()
-        yield
-    finally:
-        db.close()
-
 def test_register():
     response_data = client.post("/users/register/", json={
         "username": "testuser",
@@ -56,3 +45,13 @@ def test_create_todo(user_token):
 
     assert response.status_code == 200
     assert response.json()["title"] == "Test todo"
+
+@pytest.fixture(autouse=True)
+def clean_db():
+    db = SessionLocal()
+    try:
+        db.query(User).delete()
+        db.commit()
+        yield
+    finally:
+        db.close()
