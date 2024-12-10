@@ -48,10 +48,10 @@ def test_create_todo(user_token):
 
 @pytest.fixture(autouse=True)
 def clean_db():
+    yield
     db = SessionLocal()
     try:
         db.query(User).delete()
         db.commit()
-        yield
     finally:
         db.close()
