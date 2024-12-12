@@ -10,7 +10,7 @@ client = TestClient(app)
 def user_token():
     response = client.post("/users/login/", json={
         "username": "testuser",
-        "password": "testpassword"
+        "password": "TESTpassword1!"
     })
     assert response.status_code == 200
     response_data = response.json()
@@ -28,7 +28,7 @@ def test_register():
 
         response_data = client.post("/users/register/", json={
             "username": "testuser",
-            "password": "testpassword"
+            "password": "TESTpassword1!"
         })
         assert response_data.status_code == 200
     finally:
@@ -37,7 +37,7 @@ def test_register():
 def test_login():
     response = client.post("/users/login/", json={
         "username": "testuser",
-        "password": "testpassword"
+        "password": "TESTpassword1!"
     })
     assert response.status_code == 200
     response_data = response.json()
