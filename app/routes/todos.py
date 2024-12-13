@@ -6,7 +6,8 @@ from app.models import ToDoItem, Category
 from app.auth import get_current_user
 from datetime import datetime, timedelta, timezone
 from app.config import MAX_FILE_SIZE
-from app.cache import get_cached_todos, cache_todo
+from app.cache import get_cached_todos
+import aiofiles
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
 
@@ -78,7 +79,7 @@ def delete_todo(todo_id: int, db: SessionLocal = Depends(get_db)):
     return {"message": "ToDo deleted"}
 
 @router.post("/{todo_id}/upload/")
-def upload_file(
+async def upload_file(
         todo_id: int,
         file: UploadFile = File(...),
         db: SessionLocal = Depends(get_db),
@@ -87,10 +88,14 @@ def upload_file(
     todo = db.query(ToDoItem).filter(ToDoItem.id == todo_id, ToDoItem.user_id == current_user.id).first()
     if not todo:
         raise HTTPException(status_code=404, detail="ToDo not found")
-    file_content = file.file.read()
-    if len(file_content) > MAX_FILE_SIZE:
+    if file.size > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File is too large")
-    todo.file_data = file_content
+
+    async with aiofiles.open(f"/todos/{todo_id}/upload/{file.filename}", "wb") as out_file:
+        file_content = await file.read()
+        await out_file.write(file_content)
+
+    todo.file_path = f"/todos/{todo_id}/upload/{file.filename}"
     db.commit()
     return {"message": "File uploaded successfully", "filename": file.filename}
 
@@ -103,10 +108,16 @@ def download_file(
     todo = db.query(ToDoItem).filter(ToDoItem.id == todo_id, ToDoItem.user_id == current_user.id).first()
     if not todo:
         raise HTTPException(status_code=404, detail="ToDo not found")
-    if not todo.file_data:
+    if not todo.file_path:
         raise HTTPException(status_code=404, detail="File not found")
+
+    async def file_iterator(file_path):
+        async with aiofiles.open(file_path, "rb") as f:
+            while chunk := await f.read(1024):
+                yield chunk
+
     return StreamingResponse(
-        iter([todo.file_data]),
-        headers={"Content-Deposition": f"attachment; filename=todo_{todo_id}_file"},
+        file_iterator(todo.file_path),
+        headers={"Content-Deposition": f"attachment; filename={todo_id}_file"},
         media_type="application/octet-stream"
     )
