@@ -1,17 +1,11 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 from typing import Optional
 from datetime import datetime
 import re
 
 class RegisterUser(BaseModel):
-    username: str
+    username: str = Field(min_length=3, max_length=32, pattern="^[A-Za-z0-9-_]+$")
     password: str
-
-    @field_validator("username")
-    def validate_username_length(cls, value):
-        if len(value) < 3 or len(value) > 32:
-            raise ValueError("Username must be at least 3 characters length and less then 20")
-        return value
 
     @field_validator("password")
     def validate_password(cls, value):
