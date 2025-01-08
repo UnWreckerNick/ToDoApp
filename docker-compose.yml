@@ -9,7 +9,7 @@ services:
     volumes:
       - './nginx.conf:/etc/nginx/nginx.conf'
     depends_on:
-      - backend
+      - app
     networks:
       - dev
 
@@ -21,7 +21,7 @@ services:
     networks:
       - dev
 
-  backend:
+  app:
     build:
       context: ./app
     networks:
