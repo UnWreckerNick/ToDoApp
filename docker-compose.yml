@@ -26,6 +26,9 @@ services:
 
   app:
     build:
-      context: ./app
+      context: .
+      dockerfile: app/Dockerfile
     networks:
       - dev
+    volumes:
+      - ./app/todo.db:/app/todo.db
