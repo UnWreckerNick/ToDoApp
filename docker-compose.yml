@@ -1,5 +1,8 @@
+version: "3.8"
+
 networks:
-  dev:
+  dev:  # Объявление сети
+    driver: bridge
 
 services:
   nginx:
